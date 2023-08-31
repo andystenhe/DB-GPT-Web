@@ -77,28 +77,19 @@ const ChatMode = () => {
     refreshDeps: [id, scene],
   });
 
-  useEffect(() => {
-    try {
-      const contextTemp = history?.[history.length - 1]?.context;
-      const contextObj = JSON.parse(contextTemp);
-      setChartsData(contextObj?.template_name === 'report' ? contextObj?.charts : undefined);
-    } catch (e) {
-      setChartsData(undefined);
-    }
-  }, [history]);
 
-  const chartRows = useMemo(() => {
-    if (chartsData) {
-      let res = [];
+  const renderChart = (json: any) =>{
+    let charts = json?.charts;
+    let res = [];
       // 若是有类型为 IndicatorValue 的，提出去，独占一行
-      const chartCalc = chartsData?.filter((item) => item.chart_type === 'IndicatorValue');
+      const chartCalc = charts?.filter((item) => item.chart_type === 'IndicatorValue');
       if (chartCalc.length > 0) {
         res.push({
           charts: chartCalc,
           type: 'IndicatorValue',
         });
       }
-      let otherCharts = chartsData?.filter((item) => item.chart_type !== 'IndicatorValue');
+      let otherCharts = charts?.filter((item) => item.chart_type !== 'IndicatorValue');
       let otherLength = otherCharts.length;
       let curIndex = 0;
       // charts 数量 3～8个，暂定每行排序
@@ -111,18 +102,13 @@ const ChatMode = () => {
             charts: rowsItem,
           });
         }
-      });
-      return res;
-    }
-    return undefined;
-  }, [chartsData]);
-
-  return (
-    <Grid container spacing={2} className="h-full overflow-auto" sx={{ flexGrow: 1 }}>
-      {chartsData && (
+      });     
+    return (
+      <>
+      {res && (
         <Grid xs={8} className="max-h-full">
           <div className="flex flex-col gap-3 h-full">
-            {chartRows?.map((chartRow, index) => (
+            {res?.map((chartRow, index) => (
               <div key={`chart_row_${index}`} className={`${chartRow?.type !== 'IndicatorValue' ? 'flex gap-3' : ''}`}>
                 {chartRow.charts.map((chart) => {
                   if (chart.chart_type === 'IndicatorValue') {
@@ -155,32 +141,14 @@ const ChatMode = () => {
           </div>
         </Grid>
       )}
-      {/** skeleton */}
-      {!chartsData && scene === 'chat_dashboard' && (
-        <Grid xs={8} className="max-h-full p-6">
-          <div className="flex flex-col gap-3 h-full">
-            <Grid container spacing={2} sx={{ flexGrow: 1 }}>
-              <Grid xs={8}>
-                <Box className="h-full w-full" sx={{ display: 'flex', gap: 2 }}>
-                  <ChartSkeleton />
-                </Box>
-              </Grid>
-              <Grid xs={4}>
-                <ChartSkeleton />
-              </Grid>
-              <Grid xs={4}>
-                <ChartSkeleton />
-              </Grid>
-              <Grid xs={8}>
-                <ChartSkeleton />
-              </Grid>
-            </Grid>
-          </div>
-        </Grid>
-      )}
-      {/** chat panel */}
-      <Grid xs={scene === 'chat_dashboard' ? 4 : 12} className="h-full max-h-full">
-        <div className="h-full" style={{ boxShadow: scene === 'chat_dashboard' ? '0px 0px 9px 0px #c1c0c080' : 'unset' }}>
+      </>
+    )  
+  }
+
+  return (
+    <Grid container spacing={2} className="h-full overflow-auto" sx={{ flexGrow: 1 }}>      
+      <Grid xs={12} className="h-full max-h-full">
+        <div className="h-full" style={{ boxShadow: 'unset' }}>
           <ChatBoxComp
             clearIntialMessage={async () => {
               await refreshDialogList();
@@ -194,7 +162,7 @@ const ChatMode = () => {
             onSubmit={handleChatSubmit}
             paramsList={paramsList?.data}
             runParamsList={runParamsList}
-            setChartsData={setChartsData}
+            setChartsData={renderChart}
           />
         </div>
       </Grid>

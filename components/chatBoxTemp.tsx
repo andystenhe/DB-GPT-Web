@@ -15,6 +15,7 @@ import lodash from 'lodash';
 import { message } from 'antd';
 import Image from 'next/image';
 import ExcelUpload from './ChatPage/ExcelUpload';
+import NextJsCarousel from '@/components/nextJsCarousel';
 
 type Props = {
   messages: Message[];
@@ -39,7 +40,6 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
   const spaceNameOriginal = searchParams.get('spaceNameOriginal');
   const id = searchParams.get('id');
   const scene = searchParams.get('scene');
-  const isChartChat = scene === 'chat_dashboard';
   const scrollableRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentParam, setCurrentParam] = useState<string | undefined | null>();
@@ -117,7 +117,7 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
       return;
     }
     scrollableRef.current.scrollTo(0, scrollableRef.current.scrollHeight);
-  }, [messages?.length]);
+  }, [messages?.length, messages[messages?.length-1]?.context]);
 
   useEffect(() => {
     if (initMessage && messages.length <= 0) {
@@ -131,19 +131,15 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
     }
   }, [paramsList]);
 
-  useEffect(() => {
-    if (isChartChat) {
-      let temp = lodash.cloneDeep(messages);
-      temp.forEach((item) => {
-        if (item?.role === 'view' && typeof item?.context === 'string') {
-          item.context = handleJson2Obj(item?.context);
-        }
-      });
-      setShowMessages(temp.filter((item) => ['view', 'human'].includes(item.role)));
-    } else {
+  useEffect(() => {   
       setShowMessages(messages.filter((item) => ['view', 'human'].includes(item.role)));
-    }
-  }, [isChartChat, messages]);
+  }, [ messages]);
+
+  const submintRef = useRef<HTMLButtonElement>(null);
+  const handleSelect = (value: string) => {
+    methods.setValue('query', value);
+    submintRef.current?.click();
+  };
 
   return (
     <div className="w-full h-full">
@@ -189,25 +185,12 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
                   <Box sx={{ width: '76%', margin: '0 auto' }} className="flex flex-row">
                     {each.role === 'view' ? <SmartToyOutlinedIcon className='mr-2 mt-1' /> : <FaceRetouchingNaturalOutlinedIcon className='mr-2 mt-1' />}
                     <div className="inline align-middle mt-0.5 max-w-full flex-1 overflow-auto">
-                      {isChartChat && each.role === 'view' && typeof each?.context === 'object' ? (
+                      {each.role === 'view' && each?.context?.includes('"report"') ? (
                         <>
-                          {`[${each.context.template_name}]: `}
-                          <Link
-                            sx={{
-                              color: '#1677ff',
-                            }}
-                            component="button"
-                            onClick={() => {
-                              setJsonModalOpen(true);
-                              setCurrentJsonIndex(index);
-                              setJsonValue(JSON.stringify(each?.context, null, 2));
-                            }}
-                          >
-                            {each.context.template_introduce || 'More Details'}
-                          </Link>
+                         {setChartsData(JSON.parse(each?.context))}
                         </>
                       ) : (
-                        <>{typeof each.context === 'string' && <Markdown options={options}>{each.context?.replaceAll?.('\\n', '\n')}</Markdown>}</>
+                        <>{<Markdown options={options}>{each.context?.replaceAll?.('\\n', '\n')}</Markdown>}</>
                       )}
                     </div>
                   </Box>
@@ -258,46 +241,13 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
                 methods.handleSubmit(submit)(e);
               }}
             >
-              <div style={{ display: 'flex', gap: '8px' }}>
-                {Object.keys(paramsList || {}).length > 0 && (
-                  <div className="flex items-center gap-3">
-                    <Select
-                      value={currentParam}
-                      onChange={(e, newValue) => {
-                        setCurrentParam(newValue);
-                      }}
-                      sx={{ maxWidth: '100%' }}
-                    >
-                      {Object.keys(paramsList || {})?.map((paramItem) => (
-                        <Option key={paramItem} value={paramItem}>
-                          {paramItem}
-                        </Option>
-                      ))}
-                    </Select>
-                  </div>
-                )}
-                {/* Chat Excel: Upload File */}
-                {scene === 'chat_excel' && (
-                  <>
-                    <ExcelUpload
-                      convUid={id!}
-                      chatMode={scene}
-                      fileName={dialogue?.select_param}
-                      onComplete={() => {
-                        /** refresh dialogue list */
-                        clearIntialMessage?.();
-                        onRefreshHistory?.();
-                      }}
-                    />
-                  </>
-                )}
-              </div>
+              <NextJsCarousel onSelect={handleSelect} />
               <Input
                 disabled={scene === 'chat_excel' && !dialogue?.select_param}
                 className="w-full h-12"
                 variant="outlined"
                 endDecorator={
-                  <IconButton type="submit" disabled={isLoading}>
+                  <IconButton ref={submintRef} type="submit" disabled={isLoading}>
                     <SendRoundedIcon />
                   </IconButton>
                 }
@@ -349,7 +299,6 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
                     const jsonObj = JSON.parse(jsonValue);
                     temp[currentJsonIndex].context = jsonObj;
                     setShowMessages(temp);
-                    setChartsData?.(jsonObj?.charts);
                     setJsonModalOpen(false);
                     setJsonValue('');
                   } catch (e) {

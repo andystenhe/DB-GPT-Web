@@ -127,7 +127,7 @@ const LeftSide = () => {
                         }}
                       >
                         <ListItemContent>
-                          <Link href={`/chat?id=${dialogue.conv_uid}&scene=${dialogue?.chat_mode}`} className="flex items-center justify-between" >
+                          <Link href={`/chat?id=${dialogue.conv_uid}`} className="flex items-center justify-between" >
                             <Typography fontSize={14} noWrap={true}>
                               <SmsOutlinedIcon style={{ marginRight: '0.5rem' }} />
                               {dialogue?.user_name || dialogue?.user_input || 'undefined'}

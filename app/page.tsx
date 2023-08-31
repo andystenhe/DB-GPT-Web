@@ -1,7 +1,7 @@
 "use client";
 import { useRequest } from 'ahooks';
-import { useState } from 'react';
-import { Button, Input, Box, buttonClasses, Divider } from '@/lib/mui';
+import { useState,useRef } from 'react';
+import { Button, Input, Box, buttonClasses, Divider,Typography } from '@/lib/mui';
 import IconButton from '@mui/joy/IconButton';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { sendPostRequest } from '@/utils/request';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image'
+import NextJsCarousel from '@/components/nextJsCarousel';
 
 function Home() {
   const Schema = z.object({ query: z.string().min(1) });
@@ -37,23 +38,25 @@ function Home() {
     }
   };
 
+  const submintRef = useRef<HTMLButtonElement>(null);
+  const handleSelect = (value: string) => {
+    methods.setValue('query', value);
+    submintRef.current?.click();
+  };
+
   return (
     <>
       <div className='mx-auto h-full justify-center flex max-w-3xl flex-col gap-8 px-5 pt-6'>
-        <div className='my-0 mx-auto'>
-          <Image
-            src="/LOGO.png"
-            alt="Revolutionizing Database Interactions with Private LLM Technology"
-            width={856}
-            height={160}
-            className='w-full'
-            unoptimized
-          />
+        <div className='my-0 mx-auto' >
+        <Typography level="h3" className="text-center">Aqara-GPT</Typography>
+        <Typography level="body1" className="text-center pt-4">
+            Revolutionizing Database Interactions with LLM Technology
+        </Typography>
         </div>
         <div className='grid gap-8 lg:grid-cols-3'>
           <div className='lg:col-span-3'>
             <Divider className="text-[#878c93]">Quick Start</Divider>
-            <Box
+            {/* <Box
               className='grid pt-7 rounded-xl gap-2 lg:grid-cols-3 lg:gap-6'
               sx={{
                 [`& .${buttonClasses.root}`]: {
@@ -94,7 +97,8 @@ function Home() {
                   {scene['scene_name']
                 }</Button>
               ))}
-            </Box>
+            </Box> */}
+            <NextJsCarousel onSelect={handleSelect} />
           </div>
         </div>
         <div className='mt-6 mb-[10%] pointer-events-none inset-x-0 bottom-0 z-0 mx-auto flex w-full max-w-3xl flex-col items-center justify-center max-md:border-t xl:max-w-4xl [&>*]:pointer-events-auto'>
@@ -121,7 +125,7 @@ function Home() {
               variant="outlined"
               placeholder='Ask anything'
               endDecorator={
-                <IconButton type="submit" disabled={isLoading}>
+                <IconButton ref={submintRef} type="submit" disabled={isLoading}>
                   <SendRoundedIcon />
                 </IconButton>
               }

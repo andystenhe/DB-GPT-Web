@@ -10,7 +10,7 @@ const AgentPage = () => {
 	const { isContract, setIsContract, setIsMenuExpand } = useDialogueContext();
 	const searchParams = useSearchParams();
 	const scene = searchParams.get('scene');
-  const id = searchParams.get('id')
+    const id = searchParams.get('id')
 	const showChangeMode = scene && ['chat_with_db_execute', 'chat_dashboard'].includes(scene as string);
   useEffect(() => {
     // 仅初始化执行，防止dashboard页面无法切换状态
@@ -22,7 +22,7 @@ const AgentPage = () => {
   }, [id, scene, setIsMenuExpand, setIsContract])
 	return (
 		<>
-			{showChangeMode && <div className='leading-[3rem] text-right pr-3 h-12 flex justify-center'>
+			{/* {showChangeMode && <div className='leading-[3rem] text-right pr-3 h-12 flex justify-center'>
         <div className='flex items-center cursor-pointer'>
           <ModeTab />
         </div>
@@ -31,7 +31,8 @@ const AgentPage = () => {
 				<DbEditor />
 			) : (
 				<ChatMode />
-			)}
+			)} */}
+			<ChatMode />
 		</>
 	)
 }
