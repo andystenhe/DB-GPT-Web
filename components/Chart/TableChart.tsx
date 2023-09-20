@@ -13,7 +13,7 @@ export default function TableChart({ key, chart } : {
         <CardContent className="h-full">
           <Typography gutterBottom component="div">
             {chart.chart_name}
-          </Typography>·
+          </Typography>
           <Typography gutterBottom level="body3">
             {chart.chart_desc}
           </Typography>

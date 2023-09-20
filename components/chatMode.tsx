@@ -113,6 +113,19 @@ const ChatMode = () => {
                 {chartRow.charts.map((chart) => {
                   if (chart.chart_type === 'IndicatorValue') {
                     return (
+                      <>
+                      <Typography gutterBottom component="div">
+                        {chart.chart_name}
+                      </Typography>
+                      <Typography gutterBottom level="body3">
+                        {chart.chart_desc}
+                      </Typography>
+                      <Box 
+												sx={{
+													maxWidth: '100%', 
+													overflow: 'auto'
+												}}
+												>
                       <div key={chart.chart_uid} className="flex flex-row gap-3">
                         {chart.values.map((item) => (
                           <div key={item.name} className="flex-1">
@@ -127,6 +140,8 @@ const ChatMode = () => {
                           </div>
                         ))}
                       </div>
+                      </Box>
+                      </>
                     );
                   } else if (chart.chart_type === 'LineChart') {
                     return <LineChart key={chart.chart_uid} chart={chart} />;

@@ -116,8 +116,17 @@ const ChatBoxComp = ({ messages, dialogue, onSubmit, readOnly, paramsList, onRef
     if (!scrollableRef.current) {
       return;
     }
+    // console.log('scroll:'+messages?.length);
+    // console.log('hight:'+scrollableRef.current.scrollHeight);
     scrollableRef.current.scrollTo(0, scrollableRef.current.scrollHeight);
-  }, [messages?.length, messages[messages?.length-1]?.context]);
+  }, [scrollableRef?.current?.scrollHeight]);
+
+  // useEffect(() => {
+  //   if (!scrollableRef.current) {
+  //     return;
+  //   }
+  //   scrollableRef.current.scrollTo(0, scrollableRef.current.scrollHeight);
+  // }, [messages[messages?.length-1]?.context]);
 
   useEffect(() => {
     if (initMessage && messages.length <= 0) {
